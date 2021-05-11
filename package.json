@@ -1,15 +1,12 @@
 {
-  "name": "@waytrade/ib-api-service",
+  "name": "@HMB-research/ib-api-service",
   "version": "0.1.17",
   "description": "Interactive Brokers API Service",
-  "author": "Matthias Frener <matthias.frener@gmail.com>",
+  "author": "Martin Kask <martin@industrial.ninja>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/waytrade/ib-api-service.git"
-  },
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org"
+    "url": "https://github.com/HMB-research/ib-api-service.git"
   },
   "files": [
     "openapi.json"
