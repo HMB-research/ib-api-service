@@ -1,6 +1,6 @@
 # ib-api-service
 
-[![Test and Publish](https://github.com/waytrade/ib-api-service/actions/workflows/publish.yml/badge.svg)](https://github.com/waytrade/ib-api-service/actions/workflows/publish.yml)
+[![Test and Publish](https://github.com/HMB-research/ib-api-service/actions/workflows/publish.yml/badge.svg)](https://github.com/HMB-research/ib-api-service/actions/workflows/publish.yml)
 
 Implements a REST / Webhook API Server on top of https://github.com/stoqey/ib
 
