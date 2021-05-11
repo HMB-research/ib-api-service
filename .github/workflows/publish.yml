@@ -8,54 +8,50 @@ env:
   IMAGE_NAME: ib-api-service
 
 jobs:
-  publish-package:
-    name: "Publish Package"
+  publish-docker:
+    name: Publish Docker Image
+    needs: publish-package
     runs-on: ubuntu-latest
 
     steps:
-      - name: "Checkout source code"
-        uses: "actions/checkout@v2"
+      - name: Checkout source code
+        uses: actions/checkout@v2
         with:
           ref: ${{ github.ref }}
 
-      # Setup Node.js
-      - name: "Setup Node.js"
+      - name: Prepare .npmrc
         uses: "actions/setup-node@v2"
         with:
           node-version: "14.x"
-
-      # Install openapitools/openapi-generator-cli
-      - name: "Install OpenAPI Tools"
-        run: npm install --global @openapitools/openapi-generator-cli
-
-      # Install packages with yarn
-      - name: "Install"
-        run: yarn install
-
-      # Build
-      - name: "Build"
-        run: yarn build
-
-      # Run tests
-      - name: "Test"
-        run: yarn test
-
-      # Export and validate APIs
-      - name: "Validate API"
-        run: yarn validate-openapi
-
-      # Automated Version Bump
-      - name: "Automated Version Bump"
-        uses: "phips28/gh-action-bump-version@master"
-        with:
-          tag-prefix: ""
+          registry-url: https://npm.pkg.github.com/
+          scope: "@HMB-research"
+          always-auth: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Publish the package
-      - name: "Publish Package"
-        run: |
-          npm config set //registry.npmjs.org/:_authToken=$NPM_AUTH_TOKEN
-          npm publish --access public
+      - name: Prepare pkg login
+        run: echo //npm.pkg.github.com/:_authToken=$NPM_AUTH_TOKEN >> .npmrc
         env:
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
+      - name: Build image
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME
+
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+
+      - name: Push image
+        run: |
+          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          # Change all uppercase to lowercase
+          IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
+          # Strip git ref prefix from version
+          VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          # Strip "v" prefix from tag name
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo $VERSION | sed -e 's/^v//')
+          # Use Docker `latest` tag convention
+          [ "$VERSION" == "master" ] && VERSION=latest
+          echo IMAGE_ID=$IMAGE_ID
+          echo VERSION=$VERSION
+          docker tag $IMAGE_NAME $IMAGE_ID:$VERSION
+          docker push $IMAGE_ID:$VERSION
