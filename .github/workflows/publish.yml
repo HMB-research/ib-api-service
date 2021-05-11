@@ -10,7 +10,6 @@ env:
 jobs:
   publish-docker:
     name: Publish Docker Image
-    needs: publish-package
     runs-on: ubuntu-latest
 
     steps:
