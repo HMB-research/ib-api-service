@@ -9,7 +9,7 @@ services:
     environment:
       TWS_USERID: ${TWS_USERID}
       TWS_PASSWORD: ${TWS_PASSWORD}
-      TRADING_MODE: ${TRADING_MODE:-live}
+      TRADING_MODE: ${TRADING_MODE:-paper}
       NODE_ENV: production
     ports:
       - 3002:3002
