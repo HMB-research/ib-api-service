@@ -2,16 +2,10 @@
 # Stage 1: Build App and install Gateway+IbcAlpha
 #
 
-FROM waytrade/microservice-core:latest as build
+FROM ubuntu:20.04
 RUN apt-get install --no-install-recommends --yes unzip
 
-# Build App
 WORKDIR /usr/src/app
-COPY ./package*.json ./
-COPY ./yarn.lock ./
-RUN yarn install
-COPY . .
-RUN yarn build
 
 # Install IB Gateway
 RUN curl -sSL https://download2.interactivebrokers.com/installers/ibgateway/latest-standalone/ibgateway-latest-standalone-linux-x64.sh --output ibgateway-latest-standalone-linux-x64.sh
@@ -24,11 +18,6 @@ RUN curl -sSL https://github.com/IbcAlpha/IBC/releases/download/3.8.5/IBCLinux-3
 RUN unzip ./IBCLinux-3.8.5.zip -d .
 COPY ./docker/config/ibc/* .
 
-#
-# Stage 2: Build Image
-#
-
-FROM node:14
 RUN apt-get update
 RUN apt-get install --no-install-recommends --yes \
   xvfb \
@@ -43,8 +32,6 @@ WORKDIR /usr/src/app
 # Copy files
 COPY ./package*.json ./
 COPY ./config ./config
-COPY --from=build /usr/src/app/dist/ ./dist
-COPY --from=build /usr/src/app/node_modules/ ./node_modules
 COPY --from=build /root/Jts/ibgateway/983/ /root/Jts/ibgateway/983
 COPY --from=build /usr/local/i4j_jres/ /usr/local/i4j_jres
 COPY --from=build /opt/ibc/ /opt/ibc
@@ -68,4 +55,4 @@ ENV DISPLAY :1
 ENV NODE_ENV production
 CMD ["/root/run.sh"]
 
-EXPOSE 3000
+EXPOSE 4003
